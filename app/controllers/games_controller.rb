@@ -5,6 +5,7 @@ class GamesController < ApplicationController
 
   def new
     @letters = [*'A'..'Z'].sample(10)
+    session[:letters] = @letters
   end
 
   def score
@@ -12,12 +13,11 @@ class GamesController < ApplicationController
     url = "https://wagon-dictionary.herokuapp.com/#{@word}"
     response = RestClient.get(url)
     result = JSON.parse(response)
-    guess = @word.upcase.split('')
-    @letters = params[:@letters].split(' ')
-    if (guess - @letters).empty? && result['found']
-      @score = "Congratulations! #{@word} is a valid word"
+    if result['found'] && validate(@word, session[:letters])
+      @score = "Congratulations! #{@word.capitalize} is a valid word"
+      @score_num = @word.size**2
     else
-      @score = "Sorry, try again"
+      @score = 'Sorry, try again'
     end
   end
 
